@@ -2,7 +2,32 @@
 
 [![PyPI version](https://badge.fury.io/py/pyhako.svg)](https://badge.fury.io/py/pyhako)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 [![Build Status](https://github.com/xtorker/PyHako/actions/workflows/ci.yml/badge.svg)](https://github.com/xtorker/PyHako/actions)
+
+## Disclaimer & Warnings
+
+> [!CAUTION]
+> **Use at your own risk.** accessing the API via unauthorized means may violate the Terms of Service of the respective platforms. This library is for educational purposes only.
+
+### 規約 / Terms of Service Ref.
+
+Users must agree to the official Terms of Service of the respective platforms. The following are excerpts from the official terms (as of writing):
+
+- [Nogizaka46 Message App Terms](https://contact.nogizaka46.com/s/n46app/page/app_terms)
+- [Sakurazaka46 Message App Terms](https://sakurazaka46.com/s/s46app/page/app_terms)
+- [Hinatazaka46 Message App Terms](https://www.hinatazaka46.com/s/h46app/page/app_terms)
+
+**第3条（知的財産権）/ Article 3 (Intellectual Property)**
+> 3. 当社が別に定める場合を除き、お客様が本コンテンツを複製、翻案、頒布、公衆送信等することは禁止します。
+
+**第8条（禁止事項）/ Article 8 (Prohibited Acts)**
+> (11) 当社または第三者の情報、データおよびソフトウェアを修正、改変、改ざん、リバースエンジニアリング、逆コンパイル、逆アッセンブルまたは消去等する行為
+
+> (16) 当社が指定するアクセス方法以外の手段で本サービスにアクセスし、またはアクセスを試みる行為
+
+> (17) 自動化された手段（クローラおよび類似の技術を含む）を用いて本サービスにアクセスし、またはアクセスを試みる行為
+
 
 **Async Python client for Sakamichi Groups (Nogizaka46, Sakurazaka46, Hinatazaka46) Message API.**
 
@@ -13,6 +38,7 @@ PyHako provides a robust, type-hinted, and async interface to interact with the 
 - 🍪 **Auto-Refresh**: Automatically refreshes access tokens using captured cookies.
 - 🚀 **Async/Await**: Built on `aiohttp` for high-performance concurrent requests.
 - 📦 **Multi-Group**: Supports Nogizaka46, Sakurazaka46, and Hinatazaka46 out of the box.
+- 📝 **Blog Scraper**: Backup official blogs (HTML + images) for all three groups.
 - 🛠️ **Type Hinted**: 100% type coverage for better IDE support.
 
 ## Configuration
@@ -81,6 +107,29 @@ async def main():
 asyncio.run(main())
 ```
 
+### 3. Blog Scraping (No Auth Required)
+Scrape official blogs for any group without authentication.
+
+```python
+import asyncio
+import aiohttp
+from pyhako.blog import NogizakaBlogScraper, HinatazakaBlogScraper, SakurazakaBlogScraper
+
+async def scrape_blogs():
+    async with aiohttp.ClientSession() as session:
+        scraper = NogizakaBlogScraper(session)
+
+        # Get all active members
+        members = await scraper.get_members()
+        print(f"Found {len(members)} members")
+
+        # Get blogs for a specific member
+        async for blog in scraper.get_blogs(member_id="some_member_code"):
+            print(f"{blog.title} - {blog.published_at}")
+
+asyncio.run(scrape_blogs())
+```
+
 ## API Reference
 
 ### `Client`
@@ -100,6 +149,18 @@ The main entry point.
 Helper for OAuth2 flow.
 
 - `login(group, headless=False, ...)`: Perform login and capture tokens.
+
+### Blog Scrapers
+Public blog scrapers (no authentication required).
+
+- `NogizakaBlogScraper(session)`: Nogizaka46 official blog.
+- `SakurazakaBlogScraper(session)`: Sakurazaka46 official blog.
+- `HinatazakaBlogScraper(session)`: Hinatazaka46 official blog.
+
+Each scraper provides:
+- `get_members()`: Get dict of member_id -> member_name.
+- `get_blogs(member_id, since_date=None)`: AsyncIterator of BlogEntry objects.
+- `get_blog_detail(blog_id)`: Fetch single blog by ID.
 
 ## Contributing
 Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
